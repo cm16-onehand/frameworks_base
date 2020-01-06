@@ -1090,6 +1090,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         showEmulatorDisplayOverlayIfNeeded();
+        mUiHandler = UiThread.getHandler();
     }
 
 
@@ -4587,9 +4588,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void systemReady() {
+        Log.i("deng", "systemReady");
         mPolicy.systemReady();
         mTaskSnapshotController.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
+        mSingleHandSwitch = judgeSingleHandSwitchBySize() ? 1 : 0;
+        if (mSingleHandSwitch > 0) {
+            mSingleHandAdapter = new SingleHandAdapter(mContext, mH, mUiHandler, this);
+            mSingleHandAdapter.registerLocked();
+        }
     }
 
     private static boolean queryWideColorGamutSupport() {
@@ -7630,5 +7637,45 @@ public class WindowManagerService extends IWindowManager.Stub
                 mWindowPlacerLocked.performSurfacePlacement();
             }
         }
+    }
+	public int mSingleHandMode = 0;
+    private SingleHandAdapter mSingleHandAdapter;
+    // private final Handler mUiHandler;
+    private  Handler mUiHandler;
+
+    private static int mSingleHandSwitch;
+    public int getSingleHandMode() {
+        return mSingleHandMode;
+    }
+    public void setSingleHandMode(int singleHandMode) {
+        Slog.i(TAG, "cur: "+mSingleHandMode+" to: "+singleHandMode);
+        if(mSingleHandMode == singleHandMode) return;
+        mSingleHandMode = singleHandMode;
+    }
+
+    /**
+     * Freeze rotation changes.  (Enable "rotation lock".)
+     * not persists across reboots.
+     * @param rotation The desired rotation to freeze to, or -1 to thaw rotation
+     * changes
+     */
+    public void freezeOrThawRotation(int rotation) {
+        if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
+                "freezeRotation()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
+        if (rotation < -1 || rotation > Surface.ROTATION_270) {
+            throw new IllegalArgumentException("Rotation argument must be -1 or a valid "
+                    + "rotation constant.");
+        }
+
+        // Slog.i(TAG, "freezeRotationTemporarily: mRotation=" + mRotation);
+
+        mPolicy.freezeOrThawRotation(rotation);
+        updateRotationUnchecked(false, false);
+    }
+
+    private boolean judgeSingleHandSwitchBySize() {
+        return mContext.getResources().getBoolean(com.android.internal.R.bool.single_hand_mode);
     }
 }

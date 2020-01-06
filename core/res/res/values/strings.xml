@@ -4995,4 +4995,7 @@
     <!-- Strings for car -->
     <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->
     <string name="car_loading_profile">Loading</string>
+	<!-- Single hand mode -->
+    <string name="singlehandmode_click_hint_message">Touch outside the screen to exit single hand mode</string>
+    <string name="singlehandmode_slide_hint_message">Slide your finger across the navigation bar to toggle single hand mode</string>
 </resources>

@@ -159,7 +159,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int FINISH_LAYOUT_REDO_ANIM = 0x0008;
     /** Layer for the screen off animation */
     int COLOR_FADE_LAYER = 0x40000001;
-
+    final static int POLICY_FLAG_REMOVE_HANDYMODE = 0x80000000;
     /**
      * Register shortcuts for window manager to dispatch.
      * Shortcut code is packed as (metaState << Integer.SIZE) | keyCode
@@ -1786,4 +1786,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @return whether the value was changed.
      */
     boolean setAodShowing(boolean aodShowing);
+	
+	
+    /**
+     * Lock the device orientation to the specified rotation,
+     * Sensor input or hdmi will be ignored until
+     * freezeOrThawRotation(-1) is called or reboot the devcie.
+     */
+    public void freezeOrThawRotation(int rotation);
 }

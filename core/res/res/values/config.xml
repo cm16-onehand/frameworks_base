@@ -3569,5 +3569,6 @@
 
     <!-- Component name for default assistant on this device -->
     <string name="config_defaultAssistantComponentName"></string>
+    <bool name="single_hand_mode">true</bool>
 
 </resources>

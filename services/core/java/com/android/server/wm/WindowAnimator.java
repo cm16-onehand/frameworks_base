@@ -75,7 +75,7 @@ public class WindowAnimator {
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
 
     private boolean mInitialized = false;
-
+    int offsetLayer = 0;
     // When set to true the animator will go over all windows after an animation frame is posted and
     // check if some got replaced and can be removed.
     private boolean mRemoveReplacedWindows = false;
@@ -153,6 +153,7 @@ public class WindowAnimator {
             mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
             mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
             mAnimating = false;
+            boolean isSingleHandAnimating = false;
             if (DEBUG_WINDOW_TRACE) {
                 Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
             }
@@ -195,6 +196,13 @@ public class WindowAnimator {
                     dc.updateWindowsForAnimator(this);
                     dc.updateWallpaperForAnimator(this);
                     dc.prepareSurfaces();
+//                    final WindowList windows = mService.getWindowListLocked(displayId);
+//                    final int N = windows.size();
+//                    for (int j = 0; j < N; j++) {
+//                        windows.get(j).mWinAnimator.prepareSurfaceLocked(true);
+//                        if (windows.get(j).mWinAnimator.mIsSingleHandExiting || windows.get(j).mWinAnimator.mIsSingleHandEntering)
+//                            isSingleHandAnimating = true;
+//                    }
                 }
 
                 for (int i = 0; i < numDisplays; i++) {

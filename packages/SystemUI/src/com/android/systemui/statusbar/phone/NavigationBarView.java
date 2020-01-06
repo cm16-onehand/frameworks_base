@@ -21,7 +21,7 @@ import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_DEAD_ZONE;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_NONE;
-
+import com.android.systemui.singlehandmode.SlideTouchEvent;
 import android.animation.LayoutTransition;
 import android.animation.LayoutTransition.TransitionListener;
 import android.animation.ObjectAnimator;
@@ -170,7 +170,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private int mRotateBtnStyle = R.style.RotateButtonCCWStart90;
 
     private boolean mShowDpadArrowKeys;
-
+    private SlideTouchEvent mSlideTouchEvent;
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
         private boolean mHomeAppearing;
@@ -291,7 +291,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
-
+        mSlideTouchEvent = new SlideTouchEvent(context);
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
         reloadNavIcons();
@@ -338,6 +338,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        mSlideTouchEvent.handleTouchEvent(event);
         final boolean deadZoneConsumed = shouldDeadZoneConsumeTouchEvents(event);
         switch (event.getActionMasked()) {
             case ACTION_DOWN:
@@ -363,6 +364,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        mSlideTouchEvent.handleTouchEvent(event);
         shouldDeadZoneConsumeTouchEvents(event);
         if (mGestureHelper.onTouchEvent(event)) {
             return true;

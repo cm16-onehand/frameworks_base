@@ -65,8 +65,10 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-
+import android.view.Display;
 import com.android.server.policy.WindowManagerPolicy;
+import android.graphics.PointF;
+import android.content.pm.ActivityInfo;
 
 import java.io.PrintWriter;
 
@@ -237,6 +239,21 @@ class WindowStateAnimator {
     boolean mPipAnimationStarted = false;
 
     private final Point mTmpPos = new Point();
+    boolean mIsLeftSingleHand;
+    boolean mIsRightSingleHand;
+    int mOpenSingleHandMode;
+    float mSingleHandScale;
+    final boolean mIsSingleHandWindow;
+    private Display mDefaultDisplay;
+    private DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
+    private final WindowManager mWindowManager;
+    int mWidth;
+    int mHeight;
+    boolean mIsSingleHandEntering;
+    boolean mIsSingleHandExiting;
+    private static final int TYPE_NORMAL = 0;
+    private static final int TYPE_LEFT = 1;
+    private static final int TYPE_RIGHT = 2;
 
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
@@ -251,6 +268,23 @@ class WindowStateAnimator {
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
         mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
+        mIsSingleHandWindow = win.toString().contains("SingleMode_window");
+        mOpenSingleHandMode = mService.getSingleHandMode();
+        mSingleHandScale = 1.0f;
+        mIsSingleHandExiting = false;
+        mIsSingleHandEntering = false;
+        mWindowManager = (WindowManager)mContext.getSystemService(
+                Context.WINDOW_SERVICE);
+        updatedisplayinfo();
+    }
+
+     public void updatedisplayinfo() {
+        mDefaultDisplay = mWindowManager.getDefaultDisplay();
+        mDefaultDisplay.getDisplayInfo(mDefaultDisplayInfo);
+        //cause single hand only use in portrait
+        boolean isPortrait = mDefaultDisplayInfo.logicalHeight > mDefaultDisplayInfo.logicalWidth;
+        mWidth = isPortrait ? mDefaultDisplayInfo.logicalWidth : mDefaultDisplayInfo.logicalHeight;
+        mHeight = isPortrait ? mDefaultDisplayInfo.logicalHeight : mDefaultDisplayInfo.logicalWidth;
     }
 
     /**
